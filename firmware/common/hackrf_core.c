@@ -374,10 +374,10 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 	si5351c_configure_multisynth(&clock_gen, 0, MSx_P1, MSx_P2, MSx_P3, 1);
 
 	/* MS0/CLK1 is the source for the CPLD (CODEC_X2_CLK). */
-	si5351c_configure_multisynth(&clock_gen, 1, 0, 0, 0, 0);//p1 doesn't matter
+	si5351c_configure_multisynth(&clock_gen, 1, 0, 0, 1, 0);
 
 	/* MS0/CLK2 is the source for SGPIO (CODEC_X2_CLK) */
-	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 0, 0);//p1 doesn't matter
+	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 1, 0);
 
 	return true;
 }
@@ -385,7 +385,7 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 bool sample_rate_set(const uint32_t sample_rate_hz) {
 	uint32_t p1 = 4608;
 	uint32_t p2 = 0;
-	uint32_t p3 = 0;
+	uint32_t p3 = 1;
 	
  	switch(sample_rate_hz) {
 	case 8000000:
