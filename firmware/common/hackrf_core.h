@@ -274,7 +274,6 @@ void enable_1v8_power(void);
 void disable_1v8_power(void);
 
 bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom);
-bool sample_rate_set(const uint32_t sampling_rate_hz);
 bool baseband_filter_bandwidth_set(const uint32_t bandwidth_hz);
 
 #if (defined HACKRF_ONE || defined RAD1O)

@@ -382,56 +382,12 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 	return true;
 }
 
-bool sample_rate_set(const uint32_t sample_rate_hz) {
-	uint32_t p1 = 4608;
+static void sample_rate_set_default() {
+	/* Set to 10 MHz, the common rate between Jellybean and Jawbreaker. */
+
+	uint32_t p1 = SI_INTDIV(40);	// 800MHz / 40 = 20 MHz (SGPIO), 10 MHz (codec)
 	uint32_t p2 = 0;
 	uint32_t p3 = 1;
-	
- 	switch(sample_rate_hz) {
-	case 8000000:
-		p1 = SI_INTDIV(50);	// 800MHz / 50 = 16 MHz (SGPIO), 8 MHz (codec)
-		break;
-		
- 	case 9216000:
- 		// 43.40277777777778: a = 43; b = 29; c = 72
- 		p1 = 5043;
- 		p2 = 40;
- 		p3 = 72;
- 		break;
-
- 	case 10000000:
-		p1 = SI_INTDIV(40);	// 800MHz / 40 = 20 MHz (SGPIO), 10 MHz (codec)
- 		break;
- 
- 	case 12288000:
- 		// 32.552083333333336: a = 32; b = 159; c = 288
- 		p1 = 3654;
- 		p2 = 192;
- 		p3 = 288;
- 		break;
-
- 	case 12500000:
-		p1 = SI_INTDIV(32);	// 800MHz / 32 = 25 MHz (SGPIO), 12.5 MHz (codec)
- 		break;
- 
- 	case 16000000:
-		p1 = SI_INTDIV(25);	// 800MHz / 25 = 32 MHz (SGPIO), 16 MHz (codec)
- 		break;
- 	
- 	case 18432000:
- 		// 21.70138888889: a = 21; b = 101; c = 144
- 		p1 = 2265;
- 		p2 = 112;
- 		p3 = 144;
- 		break;
-
- 	case 20000000:
-		p1 = SI_INTDIV(20);	// 800MHz / 20 = 40 MHz (SGPIO), 20 MHz (codec)
- 		break;
-	
-	default:
-		return false;
-	}
 	
 	/* MS0/CLK0 is the source for the MAX5864/CPLD (CODEC_CLK). */
 	si5351c_configure_multisynth(&clock_gen, 0, p1, p2, p3, 1);
@@ -441,8 +397,6 @@ bool sample_rate_set(const uint32_t sample_rate_hz) {
 
 	/* MS0/CLK2 is the source for SGPIO (CODEC_X2_CLK) */
 	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 1, 0);
-
-	return true;
 }
 
 bool baseband_filter_bandwidth_set(const uint32_t bandwidth_hz) {
@@ -493,8 +447,7 @@ void cpu_clock_init(void)
 	/* MS6/CLK6 is unused. */
 	/* MS7/CLK7 is unused. */
 
-	/* Set to 10 MHz, the common rate between Jawbreaker and HackRF One. */
-	sample_rate_set(10000000);
+	sample_rate_set_default();
 
 	si5351c_set_clock_source(&clock_gen, PLL_SOURCE_XTAL);
 	// soft reset
