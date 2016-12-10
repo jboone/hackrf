@@ -113,7 +113,7 @@ usb_request_status_t usb_vendor_request_set_sample_rate_frac(
 		return USB_REQUEST_STATUS_OK;
 	} else if (stage == USB_TRANSFER_STAGE_DATA) 
 	{
-		if( sample_rate_frac_set(set_sample_r_params.freq_hz * 2, set_sample_r_params.divider ) )
+		if( sample_rate_frac_set(set_sample_r_params.freq_hz, set_sample_r_params.divider ) )
 		{
 			usb_transfer_schedule_ack(endpoint->in);
 			return USB_REQUEST_STATUS_OK;

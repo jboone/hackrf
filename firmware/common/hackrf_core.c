@@ -327,7 +327,10 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 	uint32_t a, b, c;
 	uint32_t rem;
 
-	hackrf_ui_setSampleRate(rate_num/2);
+	hackrf_ui_setSampleRate(rate_num);
+
+	/* Desired CPLD/SGPIO frequency is sampling rate x 2. */
+	rate_num *= 2;
 
 	/* Find best config */
 	a = (VCO_FREQ * rate_denom) / rate_num;
@@ -384,6 +387,8 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 
 static void sample_rate_set_default() {
 	/* Set to 10 MHz, the common rate between Jellybean and Jawbreaker. */
+
+	hackrf_ui_setSampleRate(10000000);
 
 	uint32_t p1 = SI_INTDIV(40);	// 800MHz / 40 = 20 MHz (SGPIO), 10 MHz (codec)
 	uint32_t p2 = 0;
