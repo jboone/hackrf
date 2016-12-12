@@ -320,6 +320,10 @@ gcd(uint32_t u, uint32_t v)
 	return u << s;
 }
 
+/* Codec/sample rate is SGPIO and CPLD rate divided by 4 */
+static const uint32_t r_div_sample = 2; /* 800 MHz / 20 / 4 = 10 MHz */
+static const uint32_t r_div_sgpio = 0;  /* 800 MHz / 20 / 1 = 40 MHz */
+
 bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 {
 	const uint64_t VCO_FREQ = 800 * 1000 * 1000; /* 800 MHz */
@@ -330,7 +334,7 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 	hackrf_ui_setSampleRate(rate_num);
 
 	/* Desired CPLD/SGPIO frequency is sampling rate x 2. */
-	rate_num *= 2;
+	rate_num *= 4;
 
 	/* Find best config */
 	a = (VCO_FREQ * rate_denom) / rate_num;
@@ -374,13 +378,13 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 	MSx_P3 = c;
 
 	/* MS0/CLK0 is the source for the MAX5864/CPLD (CODEC_CLK). */
-	si5351c_configure_multisynth(&clock_gen, 0, MSx_P1, MSx_P2, MSx_P3, 1);
+	si5351c_configure_multisynth(&clock_gen, 0, MSx_P1, MSx_P2, MSx_P3, r_div_sample);
 
 	/* MS0/CLK1 is the source for the CPLD (CODEC_X2_CLK). */
-	si5351c_configure_multisynth(&clock_gen, 1, 0, 0, 1, 0);
+	si5351c_configure_multisynth(&clock_gen, 1, 0, 0, 1, r_div_sgpio);
 
 	/* MS0/CLK2 is the source for SGPIO (CODEC_X2_CLK) */
-	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 1, 0);
+	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 1, r_div_sgpio);
 
 	return true;
 }
@@ -390,18 +394,18 @@ static void sample_rate_set_default() {
 
 	hackrf_ui_setSampleRate(10000000);
 
-	uint32_t p1 = SI_INTDIV(40);	// 800MHz / 40 = 20 MHz (SGPIO), 10 MHz (codec)
+	uint32_t p1 = SI_INTDIV(20);	// 800MHz / 20 = 40 MHz (SGPIO), 10 MHz (codec)
 	uint32_t p2 = 0;
 	uint32_t p3 = 1;
 	
 	/* MS0/CLK0 is the source for the MAX5864/CPLD (CODEC_CLK). */
-	si5351c_configure_multisynth(&clock_gen, 0, p1, p2, p3, 1);
+	si5351c_configure_multisynth(&clock_gen, 0, p1, p2, p3, r_div_sample);
 
 	/* MS0/CLK1 is the source for the CPLD (CODEC_X2_CLK). */
-	si5351c_configure_multisynth(&clock_gen, 1, 0, 0, 1, 0);
+	si5351c_configure_multisynth(&clock_gen, 1, 0, 0, 1, r_div_sgpio);
 
 	/* MS0/CLK2 is the source for SGPIO (CODEC_X2_CLK) */
-	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 1, 0);
+	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 1, r_div_sgpio);
 }
 
 bool baseband_filter_bandwidth_set(const uint32_t bandwidth_hz) {
