@@ -73,3 +73,7 @@ firmware/cpld/**/*.xst
 firmware/cpld/**/*.xwbt
 
 firmware/**/build
+
+# KiCad extra files
+hardware/**/*-rescue.lib
+hardware/**/_autosave-*.kicad_pcb
