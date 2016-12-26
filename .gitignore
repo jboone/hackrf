@@ -25,6 +25,7 @@ firmware/cpld/**/isim/
 firmware/cpld/**/_ngo/
 firmware/cpld/**/_xmsgs/
 firmware/cpld/**/iseconfig/
+firmware/cpld/**/netgen/
 firmware/cpld/**/*_html/
 firmware/cpld/**/xlnx_auto_0_xdb/
 firmware/cpld/**/xst/
@@ -37,6 +38,7 @@ firmware/cpld/**/*.cmd_log
 firmware/cpld/**/*.csv
 firmware/cpld/**/*.cxt
 firmware/cpld/**/*.dat
+firmware/cpld/**/*.data
 firmware/cpld/**/*.err
 firmware/cpld/**/*.exe
 firmware/cpld/**/*.gise
@@ -44,14 +46,17 @@ firmware/cpld/**/*.gyd
 firmware/cpld/**/*.html
 firmware/cpld/**/*.ini
 firmware/cpld/**/*.ipf
+firmware/cpld/**/*.jhd
 firmware/cpld/**/*.log
 firmware/cpld/**/*.lso
 firmware/cpld/**/*.mfd
+firmware/cpld/**/*.mod
 firmware/cpld/**/*.ng[acdr]
 firmware/cpld/**/*.pad
 firmware/cpld/**/*.phd
 firmware/cpld/**/*.pnx
 firmware/cpld/**/*.prj
+firmware/cpld/**/*.pwr
 firmware/cpld/**/*.rpt
 firmware/cpld/**/*.stx
 firmware/cpld/**/*.syr
