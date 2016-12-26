@@ -256,7 +256,6 @@ bool sgpio_cpld_stream_is_enabled(sgpio_config_t* const config) {
 	return (SGPIO_GPIO_OUTREG & (1L << 10)) == 0; /* SGPIO10 */
 }
 
-
 #ifdef RAD1O
 /* The rad1o hardware has a bug which makes it
  * necessary to also switch between the two options based
