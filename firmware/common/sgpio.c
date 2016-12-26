@@ -118,16 +118,16 @@ void sgpio_configure(
 		  SGPIO_OUT_MUX_CFG_P_OE_CFG(0) /* 0x0 gpio_oe (state set by GPIO_OEREG) */
 		| SGPIO_OUT_MUX_CFG_P_OUT_CFG(0) /* 0x0 dout_doutm1 (1-bit mode) */
 		;
-    SGPIO_OUT_MUX_CFG(10) =		// GPIO10: Output: disable
+    SGPIO_OUT_MUX_CFG(10) =		// SGPIO10: Output: disable
 		  SGPIO_OUT_MUX_CFG_P_OE_CFG(0) /* 0x0 gpio_oe (state set by GPIO_OEREG) */
 		| SGPIO_OUT_MUX_CFG_P_OUT_CFG(4) /* 0x4=gpio_out (level set by GPIO_OUTREG) */
 		;
-    SGPIO_OUT_MUX_CFG(11) =		// GPIO11: Output: direction
+    SGPIO_OUT_MUX_CFG(11) =		// SGPIO11: Output: direction
 		  SGPIO_OUT_MUX_CFG_P_OE_CFG(0) /* 0x0 gpio_oe (state set by GPIO_OEREG) */
 		| SGPIO_OUT_MUX_CFG_P_OUT_CFG(4) /* 0x4=gpio_out (level set by GPIO_OUTREG) */
 		;
 	SGPIO_OUT_MUX_CFG(14) =		// SGPIO14: Output: internal GPDMA burst request
-		  SGPIO_OUT_MUX_CFG_P_OE_CFG(0) /* 0x4 dout_oem1 (1-bit mode) */
+		  SGPIO_OUT_MUX_CFG_P_OE_CFG(0) /* 0x0 gpio_oe (state set by GPIO_OEREG) */
 		| SGPIO_OUT_MUX_CFG_P_OUT_CFG(0) /* 0x0 dout_doutm1 (1-bit mode) */
 		;
 
