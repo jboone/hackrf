@@ -86,7 +86,7 @@ void si5351c_power_down_all_clocks(si5351c_driver_t* const drv)
  */
 void si5351c_set_crystal_configuration(si5351c_driver_t* const drv)
 {
-	uint8_t data[] = { 183, 0x80 };
+	uint8_t data[] = { 183, 0x92 };
 	si5351c_write(drv, data, sizeof(data));
 }
 
