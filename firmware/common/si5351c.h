@@ -68,6 +68,7 @@ typedef struct {
 	uint8_t i2c_address;
 } si5351c_driver_t;
 
+void si5351c_wait_for_sys_init_complete(si5351c_driver_t* const drv);
 void si5351c_disable_all_outputs(si5351c_driver_t* const drv);
 void si5351c_disable_oeb_pin_control(si5351c_driver_t* const drv);
 void si5351c_power_down_all_clocks(si5351c_driver_t* const drv);

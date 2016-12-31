@@ -49,6 +49,10 @@ void si5351c_write(si5351c_driver_t* const drv, const uint8_t* const data, const
 	i2c_bus_transfer(drv->bus, drv->i2c_address, data, data_count, NULL, 0);
 }
 
+void si5351c_wait_for_sys_init_complete(si5351c_driver_t* const drv) {
+	while( si5351c_read_single(drv, 0) & 0x80 ) { }
+}
+
 /* Disable all CLKx outputs. */
 void si5351c_disable_all_outputs(si5351c_driver_t* const drv)
 {
