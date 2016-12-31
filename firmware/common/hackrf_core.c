@@ -431,6 +431,10 @@ void cpu_clock_init(void)
 	si5351c_disable_all_outputs(&clock_gen);
 	si5351c_disable_oeb_pin_control(&clock_gen);
 	si5351c_power_down_all_clocks(&clock_gen);
+	si5351c_init_clk_disable_states(&clock_gen);
+	si5351c_init_spread_spectrum(&clock_gen);
+	si5351c_init_vcxo(&clock_gen);
+	si5351c_init_phase_offsets(&clock_gen);
 	si5351c_set_crystal_configuration(&clock_gen);
 	si5351c_enable_xo_and_ms_fanout(&clock_gen);
 	si5351c_configure_pll_sources(&clock_gen);

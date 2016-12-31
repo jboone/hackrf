@@ -79,6 +79,26 @@ void si5351c_power_down_all_clocks(si5351c_driver_t* const drv)
 	si5351c_write(drv, data, sizeof(data));
 }
 
+void si5351c_init_clk_disable_states(si5351c_driver_t* const drv) {
+	uint8_t data[] = { 24, 0, 0 };	
+	si5351c_write(drv, data, sizeof(data));
+}
+
+void si5351c_init_spread_spectrum(si5351c_driver_t* const drv) {
+	uint8_t data[] = { 149, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	si5351c_write(drv, data, sizeof(data));
+}
+
+void si5351c_init_vcxo(si5351c_driver_t* const drv) {
+	uint8_t data[] = { 162, 0, 0, 0 };
+	si5351c_write(drv, data, sizeof(data));
+}
+
+void si5351c_init_phase_offsets(si5351c_driver_t* const drv) {
+	uint8_t data[] = { 165, 0, 0, 0, 0, 0, 0 };
+	si5351c_write(drv, data, sizeof(data));
+}
+
 /*
  * Register 183: Crystal Internal Load Capacitance
  * Reads as 0xE4 on power-up

@@ -71,6 +71,10 @@ typedef struct {
 void si5351c_disable_all_outputs(si5351c_driver_t* const drv);
 void si5351c_disable_oeb_pin_control(si5351c_driver_t* const drv);
 void si5351c_power_down_all_clocks(si5351c_driver_t* const drv);
+void si5351c_init_clk_disable_states(si5351c_driver_t* const drv);
+void si5351c_init_spread_spectrum(si5351c_driver_t* const drv);
+void si5351c_init_vcxo(si5351c_driver_t* const drv);
+void si5351c_init_phase_offsets(si5351c_driver_t* const drv);
 void si5351c_set_crystal_configuration(si5351c_driver_t* const drv);
 void si5351c_enable_xo_and_ms_fanout(si5351c_driver_t* const drv);
 void si5351c_configure_pll_sources(si5351c_driver_t* const drv);
