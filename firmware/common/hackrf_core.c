@@ -429,7 +429,7 @@ void cpu_clock_init(void)
 	i2c_bus_start(clock_gen.bus, &i2c_config_si5351c_slow_clock);
 
 	si5351c_wait_for_sys_init_complete(&clock_gen);
-	si5351c_disable_all_outputs(&clock_gen);
+	si5351c_disable_clock_outputs(&clock_gen, 0xff);
 	si5351c_disable_oeb_pin_control(&clock_gen);
 	si5351c_power_down_all_clocks(&clock_gen);
 	si5351c_init_clk_disable_states(&clock_gen);
@@ -465,7 +465,10 @@ void cpu_clock_init(void)
 
 	si5351c_set_clock_source(&clock_gen, PLL_SOURCE_XTAL);
 	si5351c_reset_plls(&clock_gen);
-	si5351c_enable_clock_outputs(&clock_gen);
+	/* Enable CLK outputs 0, 1, 2, 4, 5 only. */
+	/* 7: Clock to CPU is deactivated as it is not used and creates noise */
+	/* 3: External clock output is deactivated by default */
+	si5351c_enable_clock_outputs(&clock_gen, (1 << 0) | (1 << 1) | (1 << 2) | (1 << 4) | (1 << 5));
 
 	//FIXME disable I2C
 	/* Kick I2C0 down to 400kHz when we switch over to APB1 clock = 204MHz */

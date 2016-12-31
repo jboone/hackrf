@@ -54,10 +54,10 @@ void si5351c_wait_for_sys_init_complete(si5351c_driver_t* const drv) {
 }
 
 /* Disable all CLKx outputs. */
-void si5351c_disable_all_outputs(si5351c_driver_t* const drv)
+void si5351c_disable_clock_outputs(si5351c_driver_t* const drv, const uint8_t mask)
 {
-	uint8_t data[] = { 3, 0xFF };
-	si5351c_write(drv, data, sizeof(data));
+	const uint8_t state = si5351c_read_single(drv, 3);
+	si5351c_write_single(drv, 3, state | mask);
 }
 
 /* Turn off OEB pin control for all CLKx */
@@ -221,13 +221,10 @@ void si5351c_configure_clock_control(si5351c_driver_t* const drv, const enum pll
 	si5351c_write(drv, data, sizeof(data));
 }
 
-void si5351c_enable_clock_outputs(si5351c_driver_t* const drv)
+void si5351c_enable_clock_outputs(si5351c_driver_t* const drv, const uint8_t mask)
 {
-	/* Enable CLK outputs 0, 1, 2, 4, 5 only. */
-	/* 7: Clock to CPU is deactivated as it is not used and creates noise */
-	/* 3: External clock output is deactivated by default */
-	uint8_t data[] = { 3, ~((1 << 0) | (1 << 1) | (1 << 2) | (1 << 4) | (1 << 5))};
-	si5351c_write(drv, data, sizeof(data));
+	const uint8_t state = si5351c_read_single(drv, 3);
+	si5351c_write_single(drv, 3, state & (~mask));
 }
 
 void si5351c_set_int_mode(si5351c_driver_t* const drv, const uint_fast8_t ms_number, const uint_fast8_t on){
