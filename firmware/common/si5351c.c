@@ -150,7 +150,7 @@ void si5351c_configure_pll_multisynth(si5351c_driver_t* const drv)
 	si5351c_write(drv, data, sizeof(data));
 }
 
-void si5351c_reset_pll(si5351c_driver_t* const drv)
+void si5351c_reset_plls(si5351c_driver_t* const drv)
 {
 	/* reset PLLA and PLLB */
 	uint8_t data[] = { 177, 0xac };

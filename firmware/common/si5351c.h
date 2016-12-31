@@ -80,7 +80,7 @@ void si5351c_set_crystal_configuration(si5351c_driver_t* const drv);
 void si5351c_enable_xo_and_ms_fanout(si5351c_driver_t* const drv);
 void si5351c_configure_pll_sources(si5351c_driver_t* const drv);
 void si5351c_configure_pll_multisynth(si5351c_driver_t* const drv);
-void si5351c_reset_pll(si5351c_driver_t* const drv);
+void si5351c_reset_plls(si5351c_driver_t* const drv);
 void si5351c_configure_multisynth(si5351c_driver_t* const drv,
 		const uint_fast8_t ms_number,
     	const uint32_t p1, const uint32_t p2, const uint32_t p3,
