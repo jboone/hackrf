@@ -43,6 +43,8 @@ extern "C"
 #include "rf_path.h"
 #include "cpld_jtag.h"
 
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
 /* hardware identification number */
 #define BOARD_ID_JAWBREAKER 1
 #define BOARD_ID_HACKRF_ONE 2

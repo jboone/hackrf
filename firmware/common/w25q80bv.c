@@ -32,7 +32,7 @@
 
 #include "w25q80bv.h"
 
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#include "hackrf_core.h"
 
 #define W25Q80BV_READ_DATA    0x03
 #define W25Q80BV_FAST_READ    0x0b
