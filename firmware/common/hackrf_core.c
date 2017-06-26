@@ -437,10 +437,10 @@ bool sample_rate_set(const uint32_t sample_rate_hz) {
 	si5351c_configure_multisynth(&clock_gen, 0, p1, p2, p3, 1);
 
 	/* MS0/CLK1 is the source for the CPLD (CODEC_X2_CLK). */
-	si5351c_configure_multisynth(&clock_gen, 1, p1, 0, 1, 0);//p1 doesn't matter
+	si5351c_configure_multisynth(&clock_gen, 1, 0, 0, 1, 0);
 
 	/* MS0/CLK2 is the source for SGPIO (CODEC_X2_CLK) */
-	si5351c_configure_multisynth(&clock_gen, 2, p1, 0, 1, 0);//p1 doesn't matter
+	si5351c_configure_multisynth(&clock_gen, 2, 0, 0, 1, 0);
 
 	return true;
 }
