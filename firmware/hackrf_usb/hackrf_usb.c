@@ -196,6 +196,8 @@ int main(void) {
 
 	unsigned int phase = 0;
 
+	cpu_clock_pll1_low_speed();
+	
 	while(true) {
 		// Check whether we need to initiate a CPLD update
 		if (start_cpld_update)
