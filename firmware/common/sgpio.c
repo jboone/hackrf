@@ -199,7 +199,7 @@ void sgpio_configure(
 			;
 
 		SGPIO_SLICE_MUX_CFG(slice_index) =
-		      SGPIO_SLICE_MUX_CFG_INV_QUALIFIER(0) /* 0x0=Use normal qualifier. */
+		      SGPIO_SLICE_MUX_CFG_INV_QUALIFIER(1) /* 0x1=Use inverted qualifier. */
 		    | SGPIO_SLICE_MUX_CFG_PARALLEL_MODE(3) /* 0x3=Shift 1 byte(8bits) per clock. */
 		    | SGPIO_SLICE_MUX_CFG_DATA_CAPTURE_MODE(0) /* 0x0=Detect rising edge. (Condition for input bit match interrupt) */
 		    | SGPIO_SLICE_MUX_CFG_INV_OUT_CLK(0) /* 0x0=Normal clock. */
