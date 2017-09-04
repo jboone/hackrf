@@ -33,37 +33,44 @@ ARCHITECTURE behavior OF tb_hd IS
 		HOST_DIRECTION     : IN    std_logic;
 		HOST_FULL_DUPLEX_N : IN    std_logic;
 		HOST_ENABLE_N      : IN    std_logic;
-		HOST_CAPTURE       : OUT   std_logic;
+		HOST_CAPTURE_N       : OUT   std_logic;
 		CODEC_CLK          : IN    std_logic;
 		CODEC_DA           : IN    std_logic_vector(7 downto 0);
 		CODEC_DD           : OUT   std_logic_vector(9 downto 0)
 	);
 	END COMPONENT;
 
-	signal HOST_CLK           : std_logic := '1';
-	signal HOST_DIRECTION     : std_logic := 'X';
+	signal CODEC_CLK          : std_logic := '0';
+	signal HOST_CLK           : std_logic := '0';
+	signal SGPIO_CLK          : std_logic := '0';
+
+	signal HOST_DIRECTION     : std_logic := '1';
 	signal HOST_FULL_DUPLEX_N : std_logic := '1';
 	signal HOST_ENABLE_N      : std_logic := '1';
-	signal CODEC_CLK          : std_logic := '1';
 	signal CODEC_DA           : std_logic_vector(7 downto 0) := (others => 'X');
 
 	signal HOST_DATA          : std_logic_vector(7 downto 0) := (others => 'Z');
 
-	signal HOST_CAPTURE       : std_logic;
+	signal HOST_CAPTURE_N       : std_logic;
 	signal CODEC_DD           : std_logic_vector(9 downto 0);
 
 	constant CODEC_CLK_period : time := 50 ns;
 	constant HOST_CLK_period  : time := CODEC_CLK_period / 2;
 	constant SGPIO_CLK_period : time := HOST_CLK_period;
 
-	constant T_sgpio          : time := 4.9 ns; -- ~204MHz
+	constant T_vco            : time := 1.25 ns;
+	constant T_vco_phase_inc  : time := T_vco / 4;
 
-	constant HOST_CLK_skew    : time := 4.1 ns;
-	constant CODEC_CLK_skew   : time := HOST_CLK_skew;
+	constant T_sgpio          : time := 5 ns; -- ~200MHz
 
-	constant MAX5864_tco_max  : time := 9 ns;
-	constant MAX5864_DD_setup : time := 10 ns;
-	constant MAX5864_DD_hold  : time := 0 ns;
+	-- Time to delay each of the clocks in the system.
+	constant CODEC_CLK_skew     : time :=   0 * T_vco_phase_inc;
+	constant HOST_CLK_skew      : time :=   0 * T_vco_phase_inc;
+	constant SGPIO_CLK_skew     : time :=   0 * T_vco_phase_inc;
+
+	constant MAX5864_DA_tco_max : time := 9 ns;
+	constant MAX5864_DD_setup   : time := 10 ns;
+	constant MAX5864_DD_hold    : time := 0 ns;
 
 	signal dd_valid           : std_logic := '0';
 
@@ -77,7 +84,6 @@ ARCHITECTURE behavior OF tb_hd IS
 	-- out rise/fall = 3 ns
 	constant SGPIO_tco_max    : time := 22 ns; -- Verified via eye diagram measurement.
 
-	signal SGPIO_CLK          : std_logic := '1';
 	signal host_rx_valid      : std_logic := '0';
 
 	type adc_sample is
@@ -96,10 +102,10 @@ ARCHITECTURE behavior OF tb_hd IS
 			i : std_logic_vector(7 downto 0);
 			q : std_logic_vector(7 downto 0);
 		end record;
-	type host_data_tx_samples_array is array(0 to 5) of host_data_tx_sample;
+	type host_data_tx_samples_array is array(0 to 9) of host_data_tx_sample;
 	constant host_data_tx_samples : host_data_tx_samples_array := (
 		(X"00", X"01"), (X"02", X"03"), (X"7F", X"05"), (X"06", X"7F"), (X"08", X"09"),
-		(X"FF", X"FE") --, (X"FD", X"FC"), (X"80", X"FA"), (X"F9", X"80"), (X"F7", X"F6")
+		(X"FF", X"FE"), (X"FD", X"FC"), (X"80", X"FA"), (X"F9", X"80"), (X"F7", X"F6")
 	);
 
 BEGIN
@@ -110,38 +116,16 @@ BEGIN
 		HOST_DIRECTION     => HOST_DIRECTION,
 		HOST_FULL_DUPLEX_N => HOST_FULL_DUPLEX_N,
 		HOST_ENABLE_N      => HOST_ENABLE_N,
-		HOST_CAPTURE       => HOST_CAPTURE,
+		HOST_CAPTURE_N       => HOST_CAPTURE_N,
 		CODEC_CLK          => CODEC_CLK,
 		CODEC_DA           => CODEC_DA,
 		CODEC_DD           => CODEC_DD
 	);
 
-	SGPIO_CLK_process: process
-	begin
-		SGPIO_CLK <= '1';
-		wait for SGPIO_CLK_period/2;
-		SGPIO_CLK <= '0';
-		wait for SGPIO_CLK_period/2;
-	end process;
-
-	HOST_CLK_process: process
-	begin
-		HOST_CLK <= '0';
-
-		wait for HOST_CLK_skew;
-		loop
-			HOST_CLK <= '1';
-			wait for HOST_CLK_period/2;
-			HOST_CLK <= '0';
-			wait for HOST_CLK_period/2;
-		end loop;
-	end process;
-	
+	-- Clock entering MAX5864.CLK, CPLD.GCK1
 	CODEC_CLK_process: process
 	begin
-		CODEC_CLK <= '0';
-
-		wait for CODEC_CLK_skew;
+		wait for CODEC_CLK_period - CODEC_CLK_skew;
 		loop
 			CODEC_CLK <= '1';
 			wait for CODEC_CLK_period/2;
@@ -150,65 +134,87 @@ BEGIN
 		end loop;
 	end process;
 
+	-- Clock entering CPLD.GCK2
+	HOST_CLK_process: process
+	begin
+		wait for HOST_CLK_period - HOST_CLK_skew;
+		loop
+			HOST_CLK <= '1';
+			wait for HOST_CLK_period/2;
+			HOST_CLK <= '0';
+			wait for HOST_CLK_period/2;
+		end loop;
+	end process;
+	
+	-- Clock entering MCU.SGPIO8
+	SGPIO_CLK_process: process
+	begin
+		wait for SGPIO_CLK_period - SGPIO_CLK_skew;
+		loop
+			SGPIO_CLK <= '1';
+			wait for SGPIO_CLK_period/2;
+			SGPIO_CLK <= '0';
+			wait for SGPIO_CLK_period/2;
+		end loop;
+	end process;
+
 	control_proc: process
 	begin
-		wait until rising_edge(CODEC_CLK);
-		wait until rising_edge(CODEC_CLK);
-		wait until rising_edge(CODEC_CLK);
-		HOST_ENABLE_N <= '0';
+		wait for 143 ns;
+		HOST_ENABLE_N <= '1';
 		HOST_DIRECTION <= '0';
 
-		wait for 400 ns;
+		wait for 111 ns;
+		HOST_ENABLE_N <= '0';
 
+		wait for 200 ns;
 		HOST_ENABLE_N <= '1';
-		wait for 50 ns;
+
+		wait for 137 ns;
 		HOST_DIRECTION <= '1';
-		wait for 50 ns;
+
+		wait for 71 ns;
 		HOST_ENABLE_N <= '0';
 		
-		wait for 400 ns;
-		
+		wait for 200 ns;
 		HOST_ENABLE_N <= '1';
-		
+
 		wait;
 	end process;
 	
+	-- Generate sample output on DA with minimum valid timing.
 	da_proc: process
 	begin
-		wait for 100 ns;
-		
 		for n in adc_samples'range loop
 			wait until rising_edge(CODEC_CLK);
+			-- Assuming no hold time for DA outputs.
 			CODEC_DA <= (others => 'X');
-			wait for MAX5864_tco_max;
+			wait for MAX5864_DA_tco_max;
 			CODEC_DA <= adc_samples(n).i;
 
 			wait until falling_edge(CODEC_CLK);
+			-- Assuming no hold time for DA outputs.
 			CODEC_DA <= (others => 'X');
-			wait for MAX5864_tco_max;
+			wait for MAX5864_DA_tco_max;
 			CODEC_DA <= adc_samples(n).q;
 		end loop;
-		
-		wait until rising_edge(CODEC_CLK);
-		CODEC_DA <= (others => 'X');
-		
-		wait;
 	end process;
 
+	-- Generate signal indicating when SGPIO inputs must be valid.
 	host_rx_proc: process
 	begin
 		wait until rising_edge(SGPIO_CLK);
 		wait for SGPIO_data_hold;
 		host_rx_valid <= '0';
 		
-		wait for HOST_CLK_period - SGPIO_data_hold - SGPIO_data_setup;
+		wait for SGPIO_CLK_period - SGPIO_data_hold - SGPIO_data_setup;
 		host_rx_valid <= '1';
 	end process;
 
+	-- Generate sample output from SGPIO, with minimum valid timing.
 	host_tx_proc: process
 	begin
-		wait until rising_edge(HOST_CAPTURE);
-		wait until rising_edge(HOST_CAPTURE);
+		wait until rising_edge(HOST_DIRECTION);
 		
 		for n in host_data_tx_samples'range loop
 			wait until rising_edge(SGPIO_CLK);
@@ -218,7 +224,6 @@ BEGIN
 			HOST_DATA <= host_data_tx_samples(n).i;
 			
 			wait until rising_edge(SGPIO_CLK);
-
 			wait for SGPIO_tco_min;
 			HOST_DATA <= (others => 'X');
 			wait for SGPIO_tco_max - SGPIO_tco_min;
@@ -230,6 +235,7 @@ BEGIN
 		wait;
 	end process;
 
+	-- Generate a signal that indicates when MAX5864.DD must be valid.
 	dd_proc: process
 	begin
 		wait until rising_edge(CODEC_CLK);
