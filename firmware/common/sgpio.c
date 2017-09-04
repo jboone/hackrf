@@ -32,22 +32,27 @@ static void update_q_invert(sgpio_config_t* const config);
 #endif
 
 void sgpio_configure_pin_functions(sgpio_config_t* const config) {
-	scu_pinmux(SCU_PINMUX_SGPIO0, SCU_GPIO_FAST | SCU_CONF_FUNCTION3);
-	scu_pinmux(SCU_PINMUX_SGPIO1, SCU_GPIO_FAST | SCU_CONF_FUNCTION3);
-	scu_pinmux(SCU_PINMUX_SGPIO2, SCU_GPIO_FAST | SCU_CONF_FUNCTION2);
-	scu_pinmux(SCU_PINMUX_SGPIO3, SCU_GPIO_FAST | SCU_CONF_FUNCTION2);
-	scu_pinmux(SCU_PINMUX_SGPIO4, SCU_GPIO_FAST | SCU_CONF_FUNCTION2);
-	scu_pinmux(SCU_PINMUX_SGPIO5, SCU_GPIO_FAST | SCU_CONF_FUNCTION2);
-	scu_pinmux(SCU_PINMUX_SGPIO6, SCU_GPIO_FAST | SCU_CONF_FUNCTION0);
-	scu_pinmux(SCU_PINMUX_SGPIO7, SCU_GPIO_FAST | SCU_CONF_FUNCTION6);
-	scu_pinmux(SCU_PINMUX_SGPIO8, SCU_GPIO_FAST | SCU_CONF_FUNCTION6);
-	scu_pinmux(SCU_PINMUX_SGPIO9, SCU_GPIO_FAST | SCU_CONF_FUNCTION7);
-	scu_pinmux(SCU_PINMUX_SGPIO10, SCU_GPIO_FAST | SCU_CONF_FUNCTION6);
-	scu_pinmux(SCU_PINMUX_SGPIO11, SCU_GPIO_FAST | SCU_CONF_FUNCTION6);
-	scu_pinmux(SCU_PINMUX_SGPIO12, SCU_GPIO_FAST | SCU_CONF_FUNCTION0); /* GPIO0[13] */
-	scu_pinmux(SCU_PINMUX_SGPIO13, SCU_GPIO_FAST | SCU_CONF_FUNCTION4);	/* GPIO5[12] */
-	scu_pinmux(SCU_PINMUX_SGPIO14, SCU_GPIO_FAST | SCU_CONF_FUNCTION4);	/* GPIO5[13] */
-	scu_pinmux(SCU_PINMUX_SGPIO15, SCU_GPIO_FAST | SCU_CONF_FUNCTION4);	/* GPIO5[14] */
+	const uint32_t data_pin_config =
+		  SCU_CONF_EZI_EN_IN_BUFFER
+		| SCU_CONF_ZIF_DIS_IN_GLITCH_FILT
+		| SCU_CONF_EHS_FAST
+		;
+	scu_pinmux(SCU_PINMUX_SGPIO0, data_pin_config | SCU_CONF_FUNCTION3);
+	scu_pinmux(SCU_PINMUX_SGPIO1, data_pin_config | SCU_CONF_FUNCTION3);
+	scu_pinmux(SCU_PINMUX_SGPIO2, data_pin_config | SCU_CONF_FUNCTION2);
+	scu_pinmux(SCU_PINMUX_SGPIO3, data_pin_config | SCU_CONF_FUNCTION2);
+	scu_pinmux(SCU_PINMUX_SGPIO4, data_pin_config | SCU_CONF_FUNCTION2);
+	scu_pinmux(SCU_PINMUX_SGPIO5, data_pin_config | SCU_CONF_FUNCTION2);
+	scu_pinmux(SCU_PINMUX_SGPIO6, data_pin_config | SCU_CONF_FUNCTION0);
+	scu_pinmux(SCU_PINMUX_SGPIO7, data_pin_config | SCU_CONF_FUNCTION6);
+	scu_pinmux(SCU_PINMUX_SGPIO8, data_pin_config | SCU_CONF_FUNCTION6);
+	scu_pinmux(SCU_PINMUX_SGPIO9, data_pin_config | SCU_CONF_FUNCTION7);
+	scu_pinmux(SCU_PINMUX_SGPIO10, data_pin_config | SCU_CONF_FUNCTION6);
+	scu_pinmux(SCU_PINMUX_SGPIO11, data_pin_config | SCU_CONF_FUNCTION6);
+	scu_pinmux(SCU_PINMUX_SGPIO12, data_pin_config | SCU_CONF_FUNCTION0); /* GPIO0[13] */
+	scu_pinmux(SCU_PINMUX_SGPIO13, data_pin_config | SCU_CONF_FUNCTION4);	/* GPIO5[12] */
+	scu_pinmux(SCU_PINMUX_SGPIO14, data_pin_config | SCU_CONF_FUNCTION4);	/* GPIO5[13] */
+	scu_pinmux(SCU_PINMUX_SGPIO15, data_pin_config | SCU_CONF_FUNCTION4);	/* GPIO5[14] */
 
 	sgpio_cpld_stream_rx_set_q_invert(config, 0);
     hw_sync_enable(0);
