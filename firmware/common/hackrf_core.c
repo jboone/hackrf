@@ -326,9 +326,10 @@ gcd(uint32_t u, uint32_t v)
 	return u << s;
 }
 
-/* Codec/sample rate is SGPIO and CPLD rate divided by 4 */
-static const uint32_t r_div_sample = 2; /* 800 MHz / 20 / 4 = 10 MHz */
-static const uint32_t r_div_sgpio = 0;  /* 800 MHz / 20 / 1 = 40 MHz */
+/* SGPIO/CPLD rate is 2 x sample rate when half duplex. */
+/* SGPIO/CPLD rate is 4 x sample rate when full duplex. */
+static const uint32_t r_div_sample = 1;	/* SGPIO rate divided by 2 */
+static const uint32_t r_div_sgpio = 0;
 
 bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 {
@@ -339,8 +340,7 @@ bool sample_rate_frac_set(uint32_t rate_num, uint32_t rate_denom)
 
 	hackrf_ui_setSampleRate(rate_num);
 
-	/* Desired CPLD/SGPIO frequency is sampling rate x 2. */
-	rate_num *= 4;
+	rate_num *= (1 << r_div_sample);
 
 	/* Find best config */
 	a = (VCO_FREQ * rate_denom) / rate_num;
