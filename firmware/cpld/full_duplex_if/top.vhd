@@ -238,7 +238,7 @@ begin
 
 	process(host_clk_i)
 	begin
-		if rising_edge(host_clk_i) then
+		if falling_edge(host_clk_i) then
 			if tx_l_en then
 				tx_l_q <= host_data_tx_i(3 downto 0);
 			end if;
@@ -262,7 +262,7 @@ begin
 		if not (host_tx and host_enable) then
 			dd_q <= X"80";
 		else
-			if rising_edge(host_clk_i) then
+			if falling_edge(host_clk_i) then
 				if dd_en then
 					dd_q <= tx_2c;
 				end if;
