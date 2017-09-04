@@ -153,6 +153,7 @@ begin
 	host_rx <= host_half_duplex_rx or host_full_duplex;
 	host_tx <= host_half_duplex_tx or host_full_duplex;
 
+	-- Phases only change in full duplex mode.
 	phase_2 <= codec_clk_q2 = '1' and codec_clk_q1 = '1';
 
 	-- CODEC_CLK delays make a de facto two-bit gray code counter.
@@ -162,6 +163,7 @@ begin
 			codec_clk_q1 <= codec_clk_i;
 			codec_clk_q2 <= codec_clk_q1;
 
+			-- Phases only change in full duplex mode.
 			phase_even <= codec_clk_q1 /= codec_clk_q2;
 			phase_odd <= codec_clk_q1 = codec_clk_q2;
 
