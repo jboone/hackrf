@@ -37,6 +37,8 @@ typedef enum {
 typedef struct sgpio_config_t {
 	gpio_t gpio_rx_q_invert;
 	gpio_t gpio_hw_sync_enable;
+	gpio_t gpio_full_duplex_n;
+	gpio_t gpio_unused[1];
 	bool slice_mode_multislice;
 } sgpio_config_t;
 
@@ -50,6 +52,10 @@ void sgpio_configure(
 	sgpio_config_t* const config,
 	const sgpio_direction_t direction
 );
+void sgpio_configure_full_duplex(
+	sgpio_config_t* const config
+);
+
 void sgpio_cpld_stream_enable(sgpio_config_t* const config);
 void sgpio_cpld_stream_disable(sgpio_config_t* const config);
 bool sgpio_cpld_stream_is_enabled(sgpio_config_t* const config);

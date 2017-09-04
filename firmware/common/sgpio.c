@@ -31,6 +31,14 @@
 static void update_q_invert(sgpio_config_t* const config);
 #endif
 
+static void sgpio_cpld_full_duplex(sgpio_config_t* const config) {
+	gpio_write(config->gpio_full_duplex_n, 0);
+}
+
+static void sgpio_cpld_half_duplex(sgpio_config_t* const config) {
+	gpio_write(config->gpio_full_duplex_n, 1);
+}
+
 void sgpio_configure_pin_functions(sgpio_config_t* const config) {
 	const uint32_t data_pin_config =
 		  SCU_CONF_EZI_EN_IN_BUFFER
@@ -54,11 +62,17 @@ void sgpio_configure_pin_functions(sgpio_config_t* const config) {
 	scu_pinmux(SCU_PINMUX_SGPIO14, data_pin_config | SCU_CONF_FUNCTION4);	/* GPIO5[13] */
 	scu_pinmux(SCU_PINMUX_SGPIO15, data_pin_config | SCU_CONF_FUNCTION4);	/* GPIO5[14] */
 
+	for(size_t i=0; i<ARRAY_SIZE(config->gpio_unused); i++) {
+		gpio_write(config->gpio_unused[i], 1); 
+	}
+
 	sgpio_cpld_stream_rx_set_q_invert(config, 0);
     hw_sync_enable(0);
+	sgpio_cpld_half_duplex(config);
 
 	gpio_output(config->gpio_rx_q_invert);
 	gpio_output(config->gpio_hw_sync_enable);
+	gpio_output(config->gpio_full_duplex_n);
 }
 
 void sgpio_set_slice_mode(

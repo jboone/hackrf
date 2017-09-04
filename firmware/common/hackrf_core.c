@@ -124,6 +124,8 @@ static struct gpio_t gpio_cpld_tdi			= GPIO(3,  4);
 #endif
 
 static struct gpio_t gpio_hw_sync_enable = GPIO(5,12);
+static struct gpio_t gpio_cpld_p81_unused	= GPIO(5, 13);	// SGPIO14
+static struct gpio_t gpio_full_duplex_n		= GPIO(5, 14);	// SGPIO15
 static struct gpio_t gpio_rx_q_invert 		= GPIO(0, 13);
 
 i2c_bus_t i2c0 = {
@@ -230,6 +232,10 @@ w25q80bv_driver_t spi_flash = {
 sgpio_config_t sgpio_config = {
 	.gpio_rx_q_invert = &gpio_rx_q_invert,
 	.gpio_hw_sync_enable = &gpio_hw_sync_enable,
+	.gpio_full_duplex_n = &gpio_full_duplex_n,
+	.gpio_unused = {
+		&gpio_cpld_p81_unused,
+	},
 	.slice_mode_multislice = true,
 };
 
