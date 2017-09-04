@@ -205,7 +205,7 @@ begin
 	begin
 		if rising_edge(host_clk_i) then
 			if rx_h_en then
-				rx_h_q <= da_q(7 downto 4) xor X"8";
+				rx_h_q <= da_q(7 downto 4) xor X"8";	-- Unsigned to two's complement.
 			end if;
 				
 			if rx_l_en then
