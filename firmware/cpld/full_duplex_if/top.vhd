@@ -120,11 +120,14 @@ begin
 	-- 1111 1111 (  -1)    01 1111 11xx ( 508+o)   -V *    3 / 1023
 	-- 1000 0000 (-128)    00 0000 00xx (   0+o)   -V * 1023 / 1023
 	--     dac_in = ((((twos_complement & 0xff) ^ 0x80) << 2) + o)
-	-- Slight offset with o = 0b01 or 0b10.
-	--         127     1       0       -1      -128
-	-- 0b01:   1019    11      3       -5      -1021
-	-- 0b10:   1021    13      5       -3      -1019
-	
+	--
+	--              n where (Vrefdac / 2.56) * (n / 1023)
+	--   DD[9:2]=     127       1       0      -1    -128
+	-- DD[1:0]=00    1017       9       1      -7   -1023
+	-- DD[1:0]=01    1019      11       3      -5   -1021
+	-- DD[1:0]=10    1021      13       5      -3   -1019
+	-- DD[1:0]=11    1023      15       7      -1   -1017
+
 	-- Signals interfacing with the outside world.
 	host_clk_i <= HOST_CLK;
 	codec_clk_i <= CODEC_CLK;
@@ -265,7 +268,6 @@ begin
 		end if;
 	end process;
 
-	-- Append either "01" or "10" for minimum DC offset.
-	codec_dd_o <= dd_q & "10";
+	codec_dd_o <= dd_q & "00";
 
 end Behavioral;
