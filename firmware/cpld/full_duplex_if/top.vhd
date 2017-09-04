@@ -187,8 +187,8 @@ begin
 	rx_l_en <= true;
 	rx_l_mux_sel <= host_full_duplex and phase_even;
 
-	rx_h_oe <= host_half_duplex_rx and host_enable;
-	rx_l_oe <= host_rx and host_enable;
+	rx_h_oe <= host_half_duplex_rx;
+	rx_l_oe <= host_rx;
 
 	process(host_clk_i)
 	begin
