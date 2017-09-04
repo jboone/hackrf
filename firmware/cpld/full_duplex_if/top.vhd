@@ -28,7 +28,7 @@ entity top is
 		HOST_DIRECTION     : in    std_logic;
 		HOST_FULL_DUPLEX_N : in    std_logic;
 		HOST_ENABLE_N      : in    std_logic;
-		HOST_CAPTURE       : out   std_logic;
+		HOST_CAPTURE_N     : out   std_logic;
 		CODEC_CLK          : in    std_logic;
 		CODEC_DA           : in    std_logic_vector(7 downto 0);
 		CODEC_DD           : out   std_logic_vector(9 downto 0)
@@ -43,7 +43,6 @@ architecture Behavioral of top is
 	signal host_direction_i     : std_logic;
 	signal host_full_duplex_n_i : std_logic;
 	signal host_enable_n_i      : std_logic;
-	signal host_capture_o       : std_logic;
 
 	signal codec_da_i           : std_logic_vector(7 downto 0);
 	signal host_data_rx_o       : std_logic_vector(7 downto 0);
@@ -54,6 +53,7 @@ architecture Behavioral of top is
 	--------------------------------------------------------------------
 
 	signal host_enable          : boolean;
+	signal host_capture         : boolean;
 
 	signal host_full_duplex     : boolean;
 	signal host_half_duplex     : boolean;
@@ -132,7 +132,7 @@ begin
 	host_direction_i <= HOST_DIRECTION;
 	host_full_duplex_n_i <= HOST_FULL_DUPLEX_N;
 	host_enable_n_i <= HOST_ENABLE_N;
-	HOST_CAPTURE <= host_capture_o;
+	HOST_CAPTURE_N <= '0' when host_capture else '1';
 
 	codec_da_i <= CODEC_DA;
 	CODEC_DD <= codec_dd_o;
@@ -167,7 +167,7 @@ begin
 		end if;
 	end process;
 
-	host_capture_o <= '1' when enable_q4 else '0';
+	host_capture <= enable_q4;
 
 	process(host_clk_i)
 	begin
