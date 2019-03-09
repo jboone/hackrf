@@ -775,6 +775,7 @@ void pin_setup(void) {
 	/* Configure external clock in */
 	scu_pinmux(SCU_PINMUX_GP_CLKIN, SCU_CLK_IN | SCU_CONF_FUNCTION1);
 
+	sgpio_configure(&sgpio_config, SGPIO_DIRECTION_RX);
 	sgpio_configure_pin_functions(&sgpio_config);
 }
 

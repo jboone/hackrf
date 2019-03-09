@@ -25,5 +25,9 @@
 
 void sgpio_isr_rx();
 void sgpio_isr_tx();
+void sgpio_isr_full_duplex_8_slices();
+void sgpio_isr_full_duplex_4_slices();
+void sgpio_isr_full_duplex_4_slices_test();
+void sgpio_isr_idle();
 
 #endif/*__SGPIO_ISR_H__*/

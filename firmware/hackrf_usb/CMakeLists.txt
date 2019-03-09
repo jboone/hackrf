@@ -25,6 +25,10 @@ project(hackrf_usb)
 
 include(../hackrf-common.cmake)
 
+set(SRC_M0
+	"${PATH_HACKRF_FIRMWARE_COMMON}/m0_sleep.c"
+)
+
 set(SRC_M4
 	hackrf_usb.c
 	"${PATH_HACKRF_FIRMWARE_COMMON}/tuning.c"

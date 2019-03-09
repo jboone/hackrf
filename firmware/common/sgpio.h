@@ -32,6 +32,7 @@
 typedef enum {
 	SGPIO_DIRECTION_RX,
 	SGPIO_DIRECTION_TX,
+	SGPIO_DIRECTION_FULL_DUPLEX,
 } sgpio_direction_t;
 
 typedef struct sgpio_config_t {
@@ -44,9 +45,8 @@ typedef struct sgpio_config_t {
 
 void sgpio_configure_pin_functions(sgpio_config_t* const config);
 void sgpio_test_interface(sgpio_config_t* const config);
-void sgpio_set_slice_mode(
-	sgpio_config_t* const config,
-	const bool multi_slice
+void sgpio_configure_test(
+	sgpio_config_t* const config
 );
 void sgpio_configure(
 	sgpio_config_t* const config,
