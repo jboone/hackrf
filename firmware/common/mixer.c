@@ -4,23 +4,21 @@
 #include "max2871.h"
 #include "gpio_lpc.h"
 
+/* HackRF One and Jawbreaker */
 /* RFFC5071 GPIO serial interface PinMux */
-#if (defined JAWBREAKER || defined HACKRF_ONE)
 static struct gpio_t gpio_rffc5072_select	= GPIO(2, 13);
 static struct gpio_t gpio_rffc5072_clock	= GPIO(5,  6);
 static struct gpio_t gpio_rffc5072_data		= GPIO(3,  3);
 static struct gpio_t gpio_rffc5072_reset	= GPIO(2, 14);
-#endif
-#ifdef RAD1O
+
+/* RAD1O */
 static struct gpio_t gpio_vco_ce			= GPIO(2, 13);
 static struct gpio_t gpio_vco_sclk			= GPIO(5,  6);
 static struct gpio_t gpio_vco_sdata			= GPIO(3,  3);
 static struct gpio_t gpio_vco_le			= GPIO(2, 14);
 static struct gpio_t gpio_vco_mux			= GPIO(5, 25);
 static struct gpio_t gpio_synt_rfout_en		= GPIO(3,  5);
-#endif
 
-#if (defined JAWBREAKER || defined HACKRF_ONE)
 const rffc5071_spi_config_t rffc5071_spi_config = {
 	.gpio_select = &gpio_rffc5072_select,
 	.gpio_clock = &gpio_rffc5072_clock,
@@ -35,13 +33,12 @@ spi_bus_t spi_bus_rffc5071 = {
 	.transfer_gather = rffc5071_spi_transfer_gather,
 };
 
-mixer_driver_t mixer = {
+mixer_gpio_hackrf_t mixer_gpio_hackrf = {
 	.bus = &spi_bus_rffc5071,
 	.gpio_reset = &gpio_rffc5072_reset,
 };
-#endif
-#ifdef RAD1O
-mixer_driver_t mixer = {
+
+mixer_gpio_rad1o_t mixer_gpio_rad1o = {
 	.gpio_vco_ce = &gpio_vco_ce,
 	.gpio_vco_sclk = &gpio_vco_sclk,
 	.gpio_vco_sdata = &gpio_vco_sdata,
@@ -49,96 +46,99 @@ mixer_driver_t mixer = {
 	.gpio_synt_rfout_en = &gpio_synt_rfout_en,
 	.gpio_vco_mux = &gpio_vco_mux,
 };
-#endif
 
-void mixer_bus_setup(mixer_driver_t* const mixer)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
-	(void) mixer;
+static void mixer_driver_hackrf_bus_setup(void) {
 	spi_bus_start(&spi_bus_rffc5071, &rffc5071_spi_config);
-#endif
-#ifdef RAD1O
-	(void) mixer;
-#endif
 }
 
-void mixer_setup(mixer_driver_t* const mixer)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static void mixer_driver_hackrf_setup(void) {
 	rffc5071_setup(mixer);
-#endif
-#ifdef RAD1O
-	max2871_setup(mixer);
-#endif
 }
 
-uint64_t mixer_set_frequency(mixer_driver_t* const mixer, uint16_t mhz)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static uint64_t mixer_driver_hackrf_set_frequency(uint16_t mhz) {
 	return rffc5071_set_frequency(mixer, mhz);
-#endif
-#ifdef RAD1O
-	return max2871_set_frequency(mixer, mhz);
-#endif
 }
 
-void mixer_tx(mixer_driver_t* const mixer)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static void mixer_driver_hackrf_tx(void) {
 	rffc5071_tx(mixer);
-#endif
-#ifdef RAD1O
-	(void) mixer;
-#endif
 }
 
-void mixer_rx(mixer_driver_t* const mixer)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static void mixer_driver_hackrf_rx(void) {
 	rffc5071_rx(mixer);
-#endif
-#ifdef RAD1O
-	(void) mixer;
-#endif
 }
 
-void mixer_rxtx(mixer_driver_t* const mixer)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static void mixer_driver_hackrf_rxtx(void) {
 	rffc5071_rxtx(mixer);
-#endif
-#ifdef RAD1O
-	(void) mixer;
-#endif
 }
 
-void mixer_enable(mixer_driver_t* const mixer)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static void mixer_driver_hackrf_enable(void) {
 	rffc5071_enable(mixer);
-#endif
-#ifdef RAD1O
-	(void) mixer;
-#endif
 }
 
-void mixer_disable(mixer_driver_t* const mixer)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static void mixer_driver_hackrf_disable(void) {
 	rffc5071_disable(mixer);
-#endif
-#ifdef RAD1O
-	(void) mixer;
-#endif
 }
 
-void mixer_set_gpo(mixer_driver_t* const mixer, uint8_t gpo)
-{
-#if (defined JAWBREAKER || defined HACKRF_ONE)
+static void mixer_driver_hackrf_set_gpo(uint8_t gpo) {
 	rffc5071_set_gpo(mixer, gpo);
-#endif
-#ifdef RAD1O
-	(void) mixer;
-	(void) gpo;
-#endif
 }
+
+static const mixer_t mixer_hackrf = {
+	&mixer_driver_hackrf_bus_setup,
+	&mixer_driver_hackrf_setup,
+	&mixer_driver_hackrf_set_frequency,
+	&mixer_driver_hackrf_tx,
+	&mixer_driver_hackrf_rx,
+	&mixer_driver_hackrf_rxtx,
+	&mixer_driver_hackrf_enable,
+	&mixer_driver_hackrf_disable,
+	&mixer_driver_hackrf_set_gpo,
+};
+
+static void mixer_driver_rad1o_bus_setup(void) {
+
+}
+
+static void mixer_driver_rad1o_setup(void) {
+	max2871_setup(mixer);
+}
+
+static uint64_t mixer_driver_rad1o_set_frequency(uint16_t mhz) {
+	return max2871_set_frequency(mixer, mhz);
+}
+
+static void mixer_driver_rad1o_tx(void) {
+
+}
+
+static void mixer_driver_rad1o_rx(void) {
+
+}
+
+static void mixer_driver_rad1o_rxtx(void) {
+
+}
+
+static void mixer_driver_rad1o_enable(void) {
+	max2871_enable(mixer);
+}
+
+static void mixer_driver_rad1o_disable(void) {
+	max2871_disable(mixer);
+}
+
+static void mixer_driver_rad1o_set_gpo(uint8_t gpo) {
+
+}
+
+static const mixer_t mixer_rad1o = {
+	&mixer_driver_rad1o_bus_setup,
+	&mixer_driver_rad1o_setup,
+	&mixer_driver_rad1o_set_frequency,
+	&mixer_driver_rad1o_tx,
+	&mixer_driver_rad1o_rx,
+	&mixer_driver_rad1o_rxtx,
+	&mixer_driver_rad1o_enable,
+	&mixer_driver_rad1o_disable,
+	&mixer_driver_rad1o_set_gpo,
+};
