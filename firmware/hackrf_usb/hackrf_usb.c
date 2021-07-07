@@ -22,7 +22,9 @@
 
 #include <stddef.h>
 
+#include <libopencm3/lpc43xx/ipc.h>
 #include <libopencm3/lpc43xx/m4/nvic.h>
+#include <libopencm3/lpc43xx/rgu.h>
 
 #include <streaming.h>
 
@@ -44,56 +46,16 @@
 #include "operacake.h"
 #include "usb_api_sweep.h"
 #include "usb_api_transceiver.h"
+#include "usb_api_ui.h"
 #include "usb_bulk_buffer.h"
 #include "cpld_xc2c.h"
 #include "portapack.h"
  
-#include "hackrf-ui.h"
+#include "hackrf_ui.h"
 
-// TODO: Duplicate code/knowledge, copied from /host/libhackrf/src/hackrf.c
-// TODO: Factor this into a shared #include so that firmware can use
-// the same values.
-typedef enum {
-	HACKRF_VENDOR_REQUEST_SET_TRANSCEIVER_MODE = 1,
-	HACKRF_VENDOR_REQUEST_MAX2837_WRITE = 2,
-	HACKRF_VENDOR_REQUEST_MAX2837_READ = 3,
-	HACKRF_VENDOR_REQUEST_SI5351C_WRITE = 4,
-	HACKRF_VENDOR_REQUEST_SI5351C_READ = 5,
-	HACKRF_VENDOR_REQUEST_SAMPLE_RATE_SET = 6,
-	HACKRF_VENDOR_REQUEST_BASEBAND_FILTER_BANDWIDTH_SET = 7,
-	HACKRF_VENDOR_REQUEST_RFFC5071_WRITE = 8,
-	HACKRF_VENDOR_REQUEST_RFFC5071_READ = 9,
-	HACKRF_VENDOR_REQUEST_SPIFLASH_ERASE = 10,
-	HACKRF_VENDOR_REQUEST_SPIFLASH_WRITE = 11,
-	HACKRF_VENDOR_REQUEST_SPIFLASH_READ = 12,
-	_HACKRF_VENDOR_REQUEST_WRITE_CPLD = 13,
-	HACKRF_VENDOR_REQUEST_BOARD_ID_READ = 14,
-	HACKRF_VENDOR_REQUEST_VERSION_STRING_READ = 15,
-	HACKRF_VENDOR_REQUEST_SET_FREQ = 16,
-	HACKRF_VENDOR_REQUEST_AMP_ENABLE = 17,
-	HACKRF_VENDOR_REQUEST_BOARD_PARTID_SERIALNO_READ = 18,
-	HACKRF_VENDOR_REQUEST_SET_LNA_GAIN = 19,
-	HACKRF_VENDOR_REQUEST_SET_VGA_GAIN = 20,
-	HACKRF_VENDOR_REQUEST_SET_TXVGA_GAIN = 21,
-	_HACKRF_VENDOR_REQUEST_SET_IF_FREQ = 22,
-	HACKRF_VENDOR_REQUEST_ANTENNA_ENABLE = 23,
-	HACKRF_VENDOR_REQUEST_SET_FREQ_EXPLICIT = 24,
-	HACKRF_VENDOR_REQUEST_USB_WCID_VENDOR_REQ = 25,
-	HACKRF_VENDOR_REQUEST_INIT_SWEEP = 26,
-	HACKRF_VENDOR_REQUEST_OPERACAKE_GET_BOARDS = 27,
-	HACKRF_VENDOR_REQUEST_OPERACAKE_SET_PORTS = 28,
-	HACKRF_VENDOR_REQUEST_SET_HW_SYNC_MODE = 29,
-	HACKRF_VENDOR_REQUEST_RESET = 30,
-	HACKRF_VENDOR_REQUEST_OPERACAKE_SET_RANGES = 31,
-	HACKRF_VENDOR_REQUEST_CLKOUT_ENABLE = 32,
-	HACKRF_VENDOR_REQUEST_SPIFLASH_STATUS = 33,
-	HACKRF_VENDOR_REQUEST_SPIFLASH_CLEAR_STATUS = 34,
-	HACKRF_VENDOR_REQUEST_OPERACAKE_GPIO_TEST = 35,
-	HACKRF_VENDOR_REQUEST_CPLD_CHECKSUM = 36,
-
-	/* Update to be the next integer after the highest-numbered request. */
-	_HACKRF_VENDOR_REQUEST_ARRAY_SIZE	
-} hackrf_vendor_request;
+extern uint32_t __m0_start__;
+extern uint32_t __m0_end__;
+extern uint32_t __ram_m0_start__;
 
 static usb_request_handler_fn vendor_request_handler[] = {
 	NULL,
@@ -146,6 +108,7 @@ static usb_request_handler_fn vendor_request_handler[] = {
 #else
 	NULL,
 #endif
+	usb_vendor_request_set_ui_enable,
 };
 
 static const uint32_t vendor_request_handler_count =
@@ -186,6 +149,8 @@ void usb_configuration_changed(
 		/* Configuration number equal 0 means usb bus reset. */
 		led_off(LED1);
 	}
+	usb_endpoint_init(&usb_endpoint_bulk_in);
+	usb_endpoint_init(&usb_endpoint_bulk_out);
 }
 
 void usb_set_descriptor_by_serial_number(void)
@@ -221,7 +186,18 @@ static bool cpld_jtag_sram_load(jtag_t* const jtag) {
 	return success;
 }
 
+static void m0_rom_to_ram() {
+	uint32_t *dest = &__ram_m0_start__;
+	uint32_t *src = &__m0_start__;
+	while (src < &__m0_end__) {
+		*dest = *src;
+		dest++;
+		src++;
+	}
+}
+
 int main(void) {
+	bool operacake_allow_gpio;
 	pin_setup();
 	enable_1v8_power();
 #if (defined HACKRF_ONE || defined RAD1O)
@@ -231,6 +207,10 @@ int main(void) {
 	delay(1000000);
 #endif
 	cpu_clock_init();
+
+	/* Wake the M0 */
+	m0_rom_to_ram();
+	ipc_start_m0((uint32_t)&__ram_m0_start__);
 
 	if( !cpld_jtag_sram_load(&jtag_cpld) ) {
 		halt_and_flash(6000000);
@@ -265,49 +245,29 @@ int main(void) {
 	
 	rf_path_init(&rf_path);
 
-	if( hackrf_ui() == NULL ) {
-		operacake_init();
+	if( hackrf_ui()->operacake_gpio_compatible() ) {
+		operacake_allow_gpio = true;
+	} else {
+		operacake_allow_gpio = false;
 	}
-
-	unsigned int phase = 0;
+	operacake_init(operacake_allow_gpio);
 
 	while(true) {
-		// Check whether we need to initiate a CPLD update
-		if (start_cpld_update)
-			cpld_update();
-
-		// Check whether we need to initiate sweep mode
-		if (start_sweep_mode) {
-			start_sweep_mode = false;
+		switch (transceiver_mode()) {
+		case TRANSCEIVER_MODE_RX:
+			rx_mode();
+			break;
+		case TRANSCEIVER_MODE_TX:
+			tx_mode();
+			break;
+		case TRANSCEIVER_MODE_RX_SWEEP:
 			sweep_mode();
-		}
-
-		// Set up IN transfer of buffer 0.
-		if ( usb_bulk_buffer_offset >= 16384
-		     && phase == 1
-		     && transceiver_mode() != TRANSCEIVER_MODE_OFF) {
-			usb_transfer_schedule_block(
-				(transceiver_mode() == TRANSCEIVER_MODE_RX)
-				? &usb_endpoint_bulk_in : &usb_endpoint_bulk_out,
-				&usb_bulk_buffer[0x0000],
-				0x4000,
-				NULL, NULL
-				);
-			phase = 0;
-		}
-
-		// Set up IN transfer of buffer 1.
-		if ( usb_bulk_buffer_offset < 16384
-		     && phase == 0
-		     && transceiver_mode() != TRANSCEIVER_MODE_OFF) {
-			usb_transfer_schedule_block(
-				(transceiver_mode() == TRANSCEIVER_MODE_RX)
-				? &usb_endpoint_bulk_in : &usb_endpoint_bulk_out,
-				&usb_bulk_buffer[0x4000],
-				0x4000,
-				NULL, NULL
-			);
-			phase = 1;
+			break;
+		case TRANSCEIVER_MODE_CPLD_UPDATE:
+			cpld_update();
+			break;
+		default:
+			break;
 		}
 	}
 

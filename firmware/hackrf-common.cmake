@@ -28,7 +28,12 @@
 enable_language(C CXX ASM)
 
 SET(PATH_HACKRF_FIRMWARE ${CMAKE_CURRENT_LIST_DIR})
-SET(PATH_HACKRF_CPLD_XSVF ${PATH_HACKRF_FIRMWARE}/cpld/sgpio_if/default.xsvf)
+if(NOT DEFINED SGPIO_DEBUG)
+	SET(PATH_HACKRF_CPLD_XSVF ${PATH_HACKRF_FIRMWARE}/cpld/sgpio_if/default.xsvf)
+else()
+	SET(PATH_HACKRF_CPLD_XSVF ${PATH_HACKRF_FIRMWARE}/cpld/sgpio_debug/default.xsvf)
+endif()
+SET(VAR_USED ${SGPIO_DEBUG})
 SET(PATH_HACKRF ${PATH_HACKRF_FIRMWARE}/..)
 SET(PATH_HACKRF_FIRMWARE_COMMON ${PATH_HACKRF_FIRMWARE}/common)
 SET(LIBOPENCM3 ${PATH_HACKRF_FIRMWARE}/libopencm3)
@@ -154,7 +159,7 @@ macro(DeclareTargets)
 		${PATH_HACKRF_FIRMWARE_COMMON}/spi_bus.c
 		${PATH_HACKRF_FIRMWARE_COMMON}/spi_ssp.c
 		${PATH_HACKRF_FIRMWARE_COMMON}/gpio_lpc.c
-		${PATH_HACKRF_FIRMWARE_COMMON}/hackrf-ui.c
+		${PATH_HACKRF_FIRMWARE_COMMON}/hackrf_ui.c
 	)
 
 	if(BOARD STREQUAL "RAD1O")
@@ -215,6 +220,13 @@ macro(DeclareTargets)
 		COMMAND python ${PATH_DFU_PY} ${PROJECT_NAME}
 		COMMAND cat _header.bin _tmp.dfu >${PROJECT_NAME}.dfu
 		COMMAND rm -f _tmp.dfu _header.bin
+	)
+
+	# Program / flash targets
+	add_custom_target(
+		${PROJECT_NAME}-flash
+		DEPENDS ${PROJECT_NAME}.bin
+		COMMAND hackrf_spiflash -Rw ${PROJECT_NAME}.bin
 	)
 
 	add_custom_target(

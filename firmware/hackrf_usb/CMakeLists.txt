@@ -35,7 +35,6 @@ set(SRC_M4
 	hackrf_usb.c
 	"${PATH_HACKRF_FIRMWARE_COMMON}/tuning.c"
 	"${PATH_HACKRF_FIRMWARE_COMMON}/streaming.c"
-	sgpio_isr.c
 	usb_bulk_buffer.c
 	"${PATH_HACKRF_FIRMWARE_COMMON}/usb.c"
 	"${PATH_HACKRF_FIRMWARE_COMMON}/usb_request.c"
@@ -50,6 +49,7 @@ set(SRC_M4
 	usb_api_transceiver.c
 	usb_api_operacake.c
 	usb_api_sweep.c
+	usb_api_ui.c
 	"${PATH_HACKRF_FIRMWARE_COMMON}/usb_queue.c"
 	"${PATH_HACKRF_FIRMWARE_COMMON}/fault_handler.c"
 	"${PATH_HACKRF_FIRMWARE_COMMON}/cpld_jtag.c"
@@ -62,6 +62,8 @@ set(SRC_M4
 	"${PATH_HACKRF_FIRMWARE_COMMON}/rom_iap.c"
 	"${PATH_HACKRF_FIRMWARE_COMMON}/operacake.c"
 )
+
+set(SRC_M0 sgpio_m0.s)
 
 if(BOARD STREQUAL "HACKRF_ONE")
 	SET(SRC_M4

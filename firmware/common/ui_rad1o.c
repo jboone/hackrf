@@ -40,6 +40,10 @@ static void rad1o_ui_init(void) {
     hackrf_ui_init();
 }
 
+static void rad1o_ui_deinit(void) {
+
+}
+
 static void rad1o_ui_set_frequency(uint64_t frequency) {
     hackrf_ui_setFrequency(frequency);
 }
@@ -88,8 +92,13 @@ static void rad1o_ui_set_clock_source(clock_source_t source) {
 	hackrf_ui_setClockSource(source);
 }
 
+static bool rad1o_ui_operacake_gpio_compatible(void) {
+	return true;
+}
+
 static const hackrf_ui_t rad1o_ui = {
 	&rad1o_ui_init,
+	&rad1o_ui_deinit,
 	&rad1o_ui_set_frequency,
 	&rad1o_ui_set_sample_rate,
 	&rad1o_ui_set_direction,
@@ -102,6 +111,7 @@ static const hackrf_ui_t rad1o_ui = {
 	&rad1o_ui_set_filter,
 	&rad1o_ui_set_antenna_bias,
 	&rad1o_ui_set_clock_source,
+	&rad1o_ui_operacake_gpio_compatible,
 };
 
 const hackrf_ui_t* rad1o_ui_setup(void) {
